@@ -1,5 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@//third_party:substitution.bzl", "template_rule")
+load("@pytorch//third_party:substitution.bzl", "template_rule")
 
 template_rule(
     name = "include_dnnl_version",
@@ -55,7 +55,7 @@ cc_library(
         "-fno-strict-overflow",
         "-fopenmp",
     ] + select({
-        "@//tools/config:thread_sanitizer": ["-DMKLDNN_THR=0"],
+        "@pytorch//tools/config:thread_sanitizer": ["-DMKLDNN_THR=0"],
         "//conditions:default": ["-DMKLDNN_THR=2"],
     }),
     includes = [
@@ -72,7 +72,7 @@ cc_library(
     deps = [
         "@mkl",
     ] + select({
-        "@//tools/config:thread_sanitizer": [],
+        "@pytorch//tools/config:thread_sanitizer": [],
         "//conditions:default": ["@tbb"],
     }),
 )

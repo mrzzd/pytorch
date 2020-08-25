@@ -1,11 +1,11 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@//third_party:substitution.bzl", "template_rule")
+load("@pytorch//third_party:substitution.bzl", "template_rule")
 
 licenses(["notice"])  # Apache 2.0
 
 template_rule(
     name = "version_string",
-    src = "@//:aten/src/ATen/cpu/tbb/extra/version_string.ver.in",
+    src = "@pytorch//:aten/src/ATen/cpu/tbb/extra/version_string.ver.in",
     out = "version_string.h",
     substitutions = {
         "@CMAKE_SYSTEM_NAME@": "Unknown",

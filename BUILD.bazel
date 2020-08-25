@@ -62,6 +62,7 @@ cc_library(
         "c10/macros/cmake_macros.h",
         "c10/cuda/impl/cuda_cmake_macros.h",
     ],
+    includes =  ['.'],
     deps = [
         "@com_github_gflags_gflags//:gflags",
         "@com_github_glog//:glog",
@@ -143,7 +144,7 @@ genrule(
         "aten/src/ATen/core/TensorMethods.cpp",
         "aten/src/ATen/core/ATenOpList.cpp",
     ],
-    cmd = "$(location :gen) --source-path aten/src/ATen --install_dir `dirname $(location aten/src/ATen/Declarations.yaml)` aten/src/ATen/Declarations.cwrap aten/src/THCUNN/generic/THCUNN.h aten/src/ATen/nn.yaml aten/src/ATen/native/native_functions.yaml",
+    cmd = "$(location :gen) --source-path `dirname $(location aten/src/ATen/nn.yaml)` --install_dir `dirname $(location aten/src/ATen/Declarations.yaml)` $(location aten/src/ATen/Declarations.cwrap) $(location aten/src/THCUNN/generic/THCUNN.h) $(location aten/src/ATen/nn.yaml) $(location aten/src/ATen/native/native_functions.yaml)",
     tools = [":gen"],
 )
 
