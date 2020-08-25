@@ -244,18 +244,10 @@ class ProcessGroupNCCL : public ProcessGroup {
     // synchronizing FutureNCCL's own cudaEvents with the stream that runs
     // this callback. This new FutureNCCL's cudaEvents will record the
     // callback's stream and will have the result value of the callback.
-    void addCallbackWithStream(
-        std::function<void(void)> callback,
-        const c10::cuda::CUDAStream& stream) {
-      (*cudaEvents_)[0].block(stream);
+    void addCallback(std::function<void(void)> callback) override {
+      (*cudaEvents_)[0].block(*futureNCCLCallbackStream_);
+      c10::OptionalStreamGuard streamGuard{c10::Stream(*futureNCCLCallbackStream_)};
       callback();
-    }
-
-    // We use addCallbackWithStream instead of addCallback.
-    void addCallback(std::function<void(void)> /* unused */) override {
-      C10_THROW_ERROR(
-          Error,
-          "FutureNCCL uses addCallbackWithStream instead of addCallback.");
     }
 
     // Adds a callback to FutureNCCL, and returns another FutureNCCL to hold
@@ -273,11 +265,11 @@ class ProcessGroupNCCL : public ProcessGroup {
       auto fut = c10::make_intrusive<FutureNCCL>(
           deviceIndex_, thenFutCudaEvents, futureNCCLCallbackStream_);
 
-      // Use the dedicated callback stream to run callback.
+      // addCallback will use the dedicated callback stream to run callback.
       // Cannot move capture std::function in lambda, because it cannot deduce
       // the template type for std::function. Hence use std::bind to explicitly
       // specify types.
-      addCallbackWithStream(
+      addCallback(
           std::bind(
               [&](std::function<at::IValue(void)> cb) {
                 try {
@@ -289,8 +281,7 @@ class ProcessGroupNCCL : public ProcessGroup {
                   fut->setError(e.what());
                 }
               },
-              std::move(callback)),
-          *futureNCCLCallbackStream_);
+              std::move(callback)));
       return fut;
     }
 
